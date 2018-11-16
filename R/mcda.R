@@ -199,7 +199,9 @@ performance_matrix <- function(x, strategy, criteria, cri = TRUE, digits = 2,
   x <- data.table(x)
 
   # Format table based on number digtis to left of decimal place
-  nchars <- sapply(c(x[1, criteria, with = FALSE]), function(x) nchar(trunc(x)))
+  cl <- makeCluster(detectCores())
+  nchars <- parallel::parSapply(cl=cl, c(x[1, criteria, with = FALSE]), function(x) nchar(trunc(x)))
+  stopCluster(cl)
 
   format_tbl <- function(x, nchars){
     x_str <- matrix(NA, nrow = nrow(x), ncol = ncol(x))
@@ -214,16 +216,17 @@ performance_matrix <- function(x, strategy, criteria, cri = TRUE, digits = 2,
   }
   
   # means
-  means_tbl <- x[, lapply(.SD, mean), by = strategy, .SDcols = criteria] 
+  cl <- parallel::makeCluster(parallel::detectCores())
+  means_tbl <- x[, parallel::parLapply(cl = cl, .SD, mean), by = strategy, .SDcols = criteria] 
   means_mat <- as.matrix(means_tbl[, criteria, with = FALSE])
   means_mat_str <- format_tbl(means_mat, nchars)
   
   # credible intervals
   if (cri){
-    lower <- x[, lapply(.SD, stats::quantile, .025), by = strategy, .SDcols = criteria] 
+    lower <- x[, parallel::parLapply(cl = cl, .SD, stats::quantile, .025), by = strategy, .SDcols = criteria] 
     lower_mat <- as.matrix(lower[, criteria, with = FALSE])
     lower_mat_str <- format_tbl(lower_mat, nchars)
-    upper <- x[, lapply(.SD, stats::quantile, .975), by = strategy, .SDcols = criteria] 
+    upper <- x[, parallel::parLapply(cl = cl, .SD, stats::quantile, .975), by = strategy, .SDcols = criteria] 
     upper_mat <- as.matrix(upper[, criteria, with = FALSE])
     upper_mat_str <- format_tbl(upper_mat, nchars)
     tbl <- matrix(paste0(means_mat_str, " (", lower_mat_str, ", ", upper_mat_str, ")"),
@@ -231,6 +234,7 @@ performance_matrix <- function(x, strategy, criteria, cri = TRUE, digits = 2,
   } else{
     tbl <- means_mat_str
   }
+  parallel::stopCluster(cl)
   
   tbl <- t(tbl)
   if (is.null(rownames)){
@@ -324,7 +328,8 @@ txattr_performance <- function(struct, patients, econmod, treatments = iviNSCLC:
   
   disprog <- copy(econmod$disprog_)
   disprog[, time := time_stop - time_start]
-  lys <- disprog[, lapply(.SD, sum),
+  cl <- parallel::makeCluster(parallel::detectCores())
+  lys <- disprog[, parallel::parLapply(cl = cl, .SD, sum),
                  .SDcols = "time",
                   by = c("sample", "strategy_id", "patient_id", "from", "to")]
   lys[, ("mutation") := patients[match(lys$patient_id, patients$patient_id)]$mutation]
@@ -338,12 +343,13 @@ txattr_performance <- function(struct, patients, econmod, treatments = iviNSCLC:
   lys[, weight := ifelse(time == 0, 1, weight)]
   lys[, weighted_route := route * weight]
   lys[, weighted_yrs_since_approval := yrs_since_approval * weight]
-  lys <- lys[, lapply(.SD, sum),
+  lys <- lys[, parallel::parLapply(cl = cl, .SD, sum),
              .SDcols = c("weighted_route", "weighted_yrs_since_approval"),
              by = c("sample", "strategy_id", "patient_id")]
-  lys <- lys[, lapply(.SD, mean),
+  lys <- lys[, parallel::parLapply(cl = cl, .SD, mean),
              .SDcols = c("weighted_route", "weighted_yrs_since_approval"),
              by = c("sample", "strategy_id")]
+  parallel::stopCluster(cl)
   setnames(lys, c("weighted_route", "weighted_yrs_since_approval"), 
            c("route", "yrs_since_approval"))
   return(lys[,])

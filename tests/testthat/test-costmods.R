@@ -13,6 +13,7 @@ txseq2 <- txseq(first = "gefitinib",
 # Patient population
 pats <- create_patients(n = 4)
 
+cl <- parallel::makeCluster(parallel::detectCores())
 test_that("create_costmods first line, 4 health states", {
   n_samples <- 5
   txseqs <- txseq_list(seq1 = txseq1, seq2 = txseq2)
@@ -21,7 +22,7 @@ test_that("create_costmods first line, 4 health states", {
   costmods <- create_costmods(n = n_samples, struct = struct, patients = pats,
                               ae_probs = ae_probs)
   expect_true(inherits(costmods, "list"))
-  expect_true(all(sapply(costmods, function(x) inherits(x, "StateVals"))))
+  expect_true(all(parallel::parSapply(cl = cl, costmods, function(x) inherits(x, "StateVals"))))
 })
 
 test_that("create_costmods first line, 3 health states", {
@@ -33,6 +34,6 @@ test_that("create_costmods first line, 3 health states", {
   costmods <- create_costmods(n = n_samples, struct = struct, patients = pats,
                               ae_probs = ae_probs)
   expect_true(inherits(costmods, "list"))
-  expect_true(all(sapply(costmods, function(x) inherits(x, "StateVals"))))
+  expect_true(all(parallel::parSapply(cl = cl, costmods, function(x) inherits(x, "StateVals"))))
 })
-
+parallel::stopCluster(cl)
