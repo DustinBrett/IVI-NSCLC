@@ -292,7 +292,7 @@ create_costmod_ae <- function(n = 100,
   }
   expected_costs <- vector(mode = "list", length = length(ae_probs))
   names(expected_costs) <- names(ae_probs)
-  expected_costs[[i]] <- foreach (i=1:length(ae_probs)) %do% ae_probs[[i]] * costs_ae_dist[, names(ae_probs)[i]]
+  expected_costs[[i]] <- foreach (i=1:length(ae_probs), .packages = c("foreach")) %do% ae_probs[[i]] * costs_ae_dist[, names(ae_probs)[i]]
   expected_costs <- Reduce('+', expected_costs)
   
   # Create model
