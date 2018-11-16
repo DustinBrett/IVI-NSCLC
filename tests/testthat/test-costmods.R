@@ -21,9 +21,7 @@ test_that("create_costmods first line, 4 health states", {
   costmods <- create_costmods(n = n_samples, struct = struct, patients = pats,
                               ae_probs = ae_probs)
   expect_true(inherits(costmods, "list"))
-  cl <- parallel::makeCluster(parallel::detectCores())
-  expect_true(all(parallel::parSapply(cl = cl, costmods, function(x) inherits(x, "StateVals"))))
-  parallel::stopCluster(cl)
+  expect_true(all(sapply(costmods, function(x) inherits(x, "StateVals"))))
 })
 
 test_that("create_costmods first line, 3 health states", {
@@ -35,7 +33,5 @@ test_that("create_costmods first line, 3 health states", {
   costmods <- create_costmods(n = n_samples, struct = struct, patients = pats,
                               ae_probs = ae_probs)
   expect_true(inherits(costmods, "list"))
-  cl <- parallel::makeCluster(parallel::detectCores())
-  expect_true(all(parallel::parSapply(cl = cl, costmods, function(x) inherits(x, "StateVals"))))
-  parallel::stopCluster(cl)
+  expect_true(all(sapply(costmods, function(x) inherits(x, "StateVals"))))
 })
