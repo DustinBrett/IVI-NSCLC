@@ -300,11 +300,9 @@ check.txseq_list <- function(x){
     }
   }
   
-  if (attributes(x)$start_line == "second"){  
-    cl <- parallel::makeCluster(parallel::detectCores())
-    name_second <- parallel::parSapply(cl = cl, x, function(y) y$second)
-    name_second_plus <- parallel::parSapply(cl = cl, x, function(y) y$second_plus)
-    parallel::stopCluster(cl)
+  if (attributes(x)$start_line == "second"){
+    name_second <- sapply(x, function(y) y$second)
+    name_second_plus <- sapply(x, function(y) y$second_plus)
     if (attributes(x)$mutation == "positive"){
       if (any(is.na(name_second["pos", ])) | any(is.na(name_second_plus["pos", ]))){
         stop(paste0("T790M+ elements cannot contain NA elements when modeling ", 
