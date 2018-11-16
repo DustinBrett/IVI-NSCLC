@@ -29,17 +29,19 @@ ae_probs <- function(n, struct, params_ae = iviNSCLC::params_ae_nma){
   check_is_class(struct, name = "struct", class = "model_structure") 
   
   # Treatment used for AE
+  cl <- parallel::makeCluster(parallel::detectCores())
   if (attr(struct$txseqs, "start_line") == "first"){
-    tx <- sapply(struct$txseqs, function (x) x$first)
+    tx <- parallel::parSapply(cl = cl, struct$txseqs, function (x) x$first)
   } else if (attr(struct$txseqs, "start_line") == "second"){
       if (attr(struct$txseqs, "mutation") == "positive") {
-        tx <- sapply(struct$txseqs, function (x) x$second["pos"]) 
+        tx <- parallel::parSapply(cl = cl, struct$txseqs, function (x) x$second["pos"]) 
       } else{
-        tx <- sapply(struct$txseqs, function (x) x$second["neg"]) 
+        tx <- parallel::parSapply(cl = cl, struct$txseqs, function (x) x$second["neg"]) 
       }
   } else{
     stop("The starting line must either be 'first' or 'second'.")
   }
+  parallel::stopCluster(cl)
   tx_abb <- iviNSCLC::treatments$tx_abb[match(tx, iviNSCLC::treatments$tx_name)]  
   
   # Select columns and rows
