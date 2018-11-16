@@ -63,7 +63,6 @@ value_of_hope <- function(econmod, comparator, crra = .39, dr = .03){
   res <- sim[, lapply(.SD, mean),
                       .SDcols = "qalys",
                        by = c("strategy_id")]
-  parallel::stopCluster(cl)
   
   ## Expected utility for comparator
   sim_comparator <- sim[strategy_id == comparator]
