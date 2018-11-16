@@ -27,11 +27,12 @@ ggsave("figs/age-barplot.pdf", p, width = 5, height = 7)
 
 # Can we replicate the distribution using a normal distribution?
 sim_data <- vector(mode = "list", length = nrow(age_dist))
-for (i in 1:length(sim_data)){
-  sim_data[[i]] <- runif(1000 * age_dist[i]$prop,
-                        age_dist[i]$age_bot,
-                        age_dist[i]$age_top)
-}
+# for (i in 1:length(sim_data)){
+#   sim_data[[i]] <- runif(1000 * age_dist[i]$prop,
+#                         age_dist[i]$age_bot,
+#                         age_dist[i]$age_top)
+# }
+sim_data[[i]] <- foreach (i=1:length(sim_data)) %do% runif(1000 * age_dist[i]$prop, age_dist[i]$age_bot, age_dist[i]$age_top)
 sim_data <- unlist(sim_data)
 sim_data <- data.table(age = c(sim_data))
                    
