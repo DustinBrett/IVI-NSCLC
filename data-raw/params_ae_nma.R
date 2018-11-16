@@ -63,9 +63,7 @@ for (i in 1:length(params_ae_nma)){
   
   ### TKI with most adverse events
   tki_cols_subset <- tki_cols[tki_cols %in% colnames(posterior[[i]])]
-  cl <- parallel::makeCluster(parallel::detectCores())
-  tki_means <- parallel::parApply(cl = cl, posterior[[i]][, tki_cols_subset], 2, mean)
-  parallel::stopCluster(cl)
+  tki_means <- apply(posterior[[i]][, tki_cols_subset], 2, mean)
   tki_max_col <- names(which.max(tki_means))
   
   ### Do the imputation
