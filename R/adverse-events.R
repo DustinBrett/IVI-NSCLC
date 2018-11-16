@@ -46,7 +46,7 @@ ae_probs <- function(n, struct, params_ae = iviNSCLC::params_ae_nma){
   
   # Select columns and rows
   prob_vars <- paste0("prob_", tx_abb)
-  for (i in 1:length(params_ae)){
+  foreach (i=1:length(params_ae)){
     ## Sample rows for PSA based on posterior samples 
     n_samples <- nrow(params_ae[[i]])
     if (n <= n_samples){
