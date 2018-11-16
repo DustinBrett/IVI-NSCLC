@@ -300,7 +300,7 @@ check.txseq_list <- function(x){
     }
   }
   
-  if (attributes(x)$start_line == "second"){
+  if (attributes(x)$start_line == "second"){  
     name_second <- sapply(x, function(y) y$second)
     name_second_plus <- sapply(x, function(y) y$second_plus)
     if (attributes(x)$mutation == "positive"){

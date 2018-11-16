@@ -197,10 +197,9 @@ performance_matrix <- function(x, strategy, criteria, cri = TRUE, digits = 2,
                                rownames = NULL,
                                colnames = NULL){
   x <- data.table(x)
-
+  
   # Format table based on number digtis to left of decimal place
   nchars <- sapply(c(x[1, criteria, with = FALSE]), function(x) nchar(trunc(x)))
-
   format_tbl <- function(x, nchars){
     x_str <- matrix(NA, nrow = nrow(x), ncol = ncol(x))
     for (i in 1:ncol(x)){
