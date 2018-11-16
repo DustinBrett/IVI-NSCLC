@@ -35,3 +35,4 @@ test_that("create_costmods first line, 3 health states", {
   expect_true(inherits(costmods, "list"))
   expect_true(all(sapply(costmods, function(x) inherits(x, "StateVals"))))
 })
+
