@@ -50,8 +50,7 @@ value_of_hope <- function(econmod, comparator, crra = .39, dr = .03){
   dr_env <- dr
   econmod2 <- econmod$clone(deep = TRUE)
   econmod2$sim_qalys(dr = dr_env, by_patient = TRUE, lys = FALSE)
-  cl <- parallel::makeCluster(parallel::detectCores())
-  sim <- econmod2$qalys_[, parallel::parLapply(cl = cl, .SD, sum),
+  sim <- econmod2$qalys_[, lapply(.SD, sum),
                            .SDcols = "qalys",
                            by = c("sample", "strategy_id", "patient_id", "dr")]  
   
@@ -61,7 +60,7 @@ value_of_hope <- function(econmod, comparator, crra = .39, dr = .03){
   sim[, prob := 1/.N, by = "strategy_id"] # Empirical PDFs
   
   ## Expected QALYs 
-  res <- sim[, parallel::parLapply(cl = cl, .SD, mean),
+  res <- sim[, lapply(.SD, mean),
                       .SDcols = "qalys",
                        by = c("strategy_id")]
   parallel::stopCluster(cl)

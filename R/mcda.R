@@ -216,17 +216,16 @@ performance_matrix <- function(x, strategy, criteria, cri = TRUE, digits = 2,
   }
   
   # means
-  cl <- parallel::makeCluster(parallel::detectCores())
-  means_tbl <- x[, parallel::parLapply(cl = cl, .SD, mean), by = strategy, .SDcols = criteria] 
+  means_tbl <- x[, lapply(.SD, mean), by = strategy, .SDcols = criteria] 
   means_mat <- as.matrix(means_tbl[, criteria, with = FALSE])
   means_mat_str <- format_tbl(means_mat, nchars)
   
   # credible intervals
   if (cri){
-    lower <- x[, parallel::parLapply(cl = cl, .SD, stats::quantile, .025), by = strategy, .SDcols = criteria] 
+    lower <- x[, lapply(.SD, stats::quantile, .025), by = strategy, .SDcols = criteria] 
     lower_mat <- as.matrix(lower[, criteria, with = FALSE])
     lower_mat_str <- format_tbl(lower_mat, nchars)
-    upper <- x[, parallel::parLapply(cl = cl, .SD, stats::quantile, .975), by = strategy, .SDcols = criteria] 
+    upper <- x[, lapply(.SD, stats::quantile, .975), by = strategy, .SDcols = criteria] 
     upper_mat <- as.matrix(upper[, criteria, with = FALSE])
     upper_mat_str <- format_tbl(upper_mat, nchars)
     tbl <- matrix(paste0(means_mat_str, " (", lower_mat_str, ", ", upper_mat_str, ")"),
@@ -234,7 +233,6 @@ performance_matrix <- function(x, strategy, criteria, cri = TRUE, digits = 2,
   } else{
     tbl <- means_mat_str
   }
-  parallel::stopCluster(cl)
   
   tbl <- t(tbl)
   if (is.null(rownames)){
@@ -328,8 +326,7 @@ txattr_performance <- function(struct, patients, econmod, treatments = iviNSCLC:
   
   disprog <- copy(econmod$disprog_)
   disprog[, time := time_stop - time_start]
-  cl <- parallel::makeCluster(parallel::detectCores())
-  lys <- disprog[, parallel::parLapply(cl = cl, .SD, sum),
+  lys <- disprog[, lapply(.SD, sum),
                  .SDcols = "time",
                   by = c("sample", "strategy_id", "patient_id", "from", "to")]
   lys[, ("mutation") := patients[match(lys$patient_id, patients$patient_id)]$mutation]
@@ -343,13 +340,12 @@ txattr_performance <- function(struct, patients, econmod, treatments = iviNSCLC:
   lys[, weight := ifelse(time == 0, 1, weight)]
   lys[, weighted_route := route * weight]
   lys[, weighted_yrs_since_approval := yrs_since_approval * weight]
-  lys <- lys[, parallel::parLapply(cl = cl, .SD, sum),
+  lys <- lys[, lapply(.SD, sum),
              .SDcols = c("weighted_route", "weighted_yrs_since_approval"),
              by = c("sample", "strategy_id", "patient_id")]
-  lys <- lys[, parallel::parLapply(cl = cl, .SD, mean),
+  lys <- lys[, lapply(.SD, mean),
              .SDcols = c("weighted_route", "weighted_yrs_since_approval"),
              by = c("sample", "strategy_id")]
-  parallel::stopCluster(cl)
   setnames(lys, c("weighted_route", "weighted_yrs_since_approval"), 
            c("route", "yrs_since_approval"))
   return(lys[,])
