@@ -199,7 +199,7 @@ performance_matrix <- function(x, strategy, criteria, cri = TRUE, digits = 2,
   x <- data.table(x)
 
   # Format table based on number digtis to left of decimal place
-  cl <- parallel::makeCluster(detectCores())
+  cl <- parallel::makeCluster(parallel::detectCores())
   nchars <- parallel::parSapply(cl=cl, c(x[1, criteria, with = FALSE]), function(x) nchar(trunc(x)))
   parallel::stopCluster(cl)
 
