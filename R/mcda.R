@@ -1,5 +1,3 @@
-library("parallel")
-
 #' Linear partial value function
 #' 
 #' Convert performance for criterion on original scale to a score on a common scale
@@ -201,9 +199,7 @@ performance_matrix <- function(x, strategy, criteria, cri = TRUE, digits = 2,
   x <- data.table(x)
 
   # Format table based on number digtis to left of decimal place
-  cl <- makeCluster(detectCores())
-  nchars <- parallel::parSapply(cl=cl, c(x[1, criteria, with = FALSE]), function(x) nchar(trunc(x)))
-  stopCluster(cl)
+  nchars <- sapply(c(x[1, criteria, with = FALSE]), function(x) nchar(trunc(x)))
 
   format_tbl <- function(x, nchars){
     x_str <- matrix(NA, nrow = nrow(x), ncol = ncol(x))
