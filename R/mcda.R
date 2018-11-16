@@ -112,13 +112,7 @@ mcda <- function(x, sample, strategy, criteria,
   
   if (is.null(criteria_min)){
     criteria_min <- rep(NA, length(criteria))
-    for (i in 1:length(criteria)){
-      if (optimal[i] == "low"){
-        criteria_min[i] <- max(x[[criteria[i]]])
-      } else{
-        criteria_min[i] <- min(x[[criteria[i]]])
-      }
-    }
+    criteria_min <- foreach (i=1:length(criteria)) %do% ifelse(optimal[i] == "low", max(x[[criteria[i]]]), min(x[[criteria[i]]]))
   }
   if (is.null(criteria_max)){
    criteria_max <- rep(NA, length(criteria))
